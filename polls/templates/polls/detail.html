@@ -10,11 +10,13 @@
 
 <div class="container-fluid">
     <h3>Poll: {{ poll }} ({{ poll.questions_count }} คำถาม)</h3>
+    <a href="{% url 'poll_comment' poll_id=poll.id %}"><button class="btn-primary">เพิ่ม Comment</button></a>
     <form name="myForm" onsubmit="event.preventDefault(); submitForm();">
         {% for quest in poll.question_set.all %}
             <div class="card">
                 <div class="card-header">
                     <b>{{ quest.text }}</b>
+                    <a href="{% url "poll_question" poll_id=poll.id %}">fix</a>
                 </div>
                 <div class="row card-body">
                     <ul class="list-group col-8">

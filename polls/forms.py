@@ -1,8 +1,9 @@
 from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_integer
 
-from polls.models import Poll, Question
+from polls.models import Poll, Question, Comment, Choice
 
 
 def validate_even(value):
@@ -18,57 +19,105 @@ class PollForm(forms.Form):
     start_date = forms.DateField(required=False)
     end_date = forms.DateField(required=False)
 
-    def clean_title(self):
-        data = self.cleaned_data['title']
-
-        if "ไอทีหมีแพนด้า" not in data:
-            raise forms.ValidationError("คุณลืมชื่อคณะ")
-
-        return data
-
-    def clean(self):
-        cleaned_data = super().clean()
-        start = cleaned_data.get('start_date')
-        end = cleaned_data.get('end_date')
-
-        if start and not end:
-            # raise forms.ValidationError("โปรดเลือกวันสิ้นสุด")
-            self.add_error('end_date', "โปรดเลือกวันสิ้นสุด")
-        elif not start and end:
-            # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
-            self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
+    # def clean_title(self):
+    #     data = self.cleaned_data['title']
+    #
+    #     if "ไอทีหมีแพนด้า" not in data:
+    #         raise forms.ValidationError("คุณลืมชื่อคณะ")
+    #
+    #     return data
+    #
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     start = cleaned_data.get('start_date')
+    #     end = cleaned_data.get('end_date')
+    #
+    #     if start and not end:
+    #         # raise forms.ValidationError("โปรดเลือกวันสิ้นสุด")
+    #         self.add_error('end_date', "โปรดเลือกวันสิ้นสุด")
+    #     elif not start and end:
+    #         # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
+    #         self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
 
 class QuestionForm(forms.Form):
+    question_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
     text = forms.CharField(widget=forms.Textarea)
     type = forms.ChoiceField(choices=Question.TYPES, initial='01')
+
+class QuestionModelForm(forms.Form):
+    question = forms.CharField(widget=forms.Textarea)
 
 class PollModelForm(forms.ModelForm):
     class Meta:
         model = Poll
         exclude = ['del_flag']
 
-    def clean_title(self):
-        data = self.cleaned_data['title']
+    # def clean_title(self):
+    #     data = self.cleaned_data['title']
+    #
+    #     if "ไอทีหมีแพนด้า" not in data:
+    #         raise forms.ValidationError("คุณลืมชื่อคณะ")
+    #
+    #     return data
+    #
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     start = cleaned_data.get('start_date')
+    #     end = cleaned_data.get('end_date')
+    #
+    #     if start and not end:
+    #         # raise forms.ValidationError("โปรดเลือกวันสิ้นสุด")
+    #         self.add_error('end_date', "โปรดเลือกวันสิ้นสุด")
+    #     elif not start and end:
+    #         # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
+    #         self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
 
-        if "ไอทีหมีแพนด้า" not in data:
-            raise forms.ValidationError("คุณลืมชื่อคณะ")
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['title', 'body', 'email' ,'tel']
+    # title = forms.CharField(max_length=100, required=True)
+    # body = forms.CharField(max_length=500, required=True)
+    # email = forms.EmailField(validators=[validators.validate_email])
+    # tel = forms.IntegerField(min_value=10, max_value=10)
 
-        return data
+    # def clean_title(self):
+    #     data = self.cleaned_data['title']
+    #
+    #     if not data:
+    #         raise forms.ValidationError("ต้องกรอก email หรือ Mobile Number")
+    #
+    #     return data
 
     def clean(self):
         cleaned_data = super().clean()
-        start = cleaned_data.get('start_date')
-        end = cleaned_data.get('end_date')
+        email = cleaned_data.get('email')
+        mobile = cleaned_data.get('tel')
 
-        if start and not end:
+        if not email and not mobile:
+            self.add_error('tel', "ต้องกรอก email หรือ Mobile Number")
             # raise forms.ValidationError("โปรดเลือกวันสิ้นสุด")
-            self.add_error('end_date', "โปรดเลือกวันสิ้นสุด")
-        elif not start and end:
+        try:
+            int(mobile)
+        except:
+            self.add_error('tel', "หมายเลขโทรศัพท์ต้องเป็นตัวเลขเท่านั้น")
+        if len(mobile) < 10:
             # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
-            self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
+            self.add_error('tel', "หมายเลขโทรศัพท์ต้องมี 10 หลัก")
+        # elif not validators.validate_email(email):
+        #     self.add_error('email', "Email a valid email address")
 
 # class ContactForm(forms.Form):
 #     subject = forms.CharField(max_length=100)
 #     message = forms.CharField()
 #     sender = forms.EmailField()
 #     recipients =
+
+class ChoiceForm(forms.ModelForm):
+    class Meta:
+        model = Choice
+        exclude = []
+
+class CreateQuestion(forms.Form):
+    text = forms.CharField(widget=forms.Textarea)
+    value = forms.IntegerField(max_value=1)
