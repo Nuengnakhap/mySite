@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import User
+from django.forms import formset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
-from .forms import PollForm, PollModelForm
+from .forms import PollForm, PollModelForm, QuestionForm
 from polls.models import Poll, Question, Answer
 
 
@@ -46,12 +47,26 @@ def detail(request, poll_id):
 @login_required
 @permission_required('polls.add_poll')
 def create(request):
-
+    context = {}
+    ques = 0
+    QuestionFormSet = formset_factory(QuestionForm, extra=2)
     if request.method == 'POST':
         form = PollModelForm(request.POST)
 
+        formset = QuestionFormSet(request.POST)
         if form.is_valid():
-            form.save()
+            poll = form.save()
+            if formset.is_valid():
+                for question_form in formset:
+
+                    Question.objects.create(
+                        text=question_form.cleaned_data.get('text' ),
+                        type=question_form.cleaned_data.get('type'),
+                        poll_id = poll.id
+                    )
+                    ques += 1
+                context['success'] = "Poll %s is created successfully!" % poll.title
+                ques = 0
             # poll = Poll.objects.create(
             #     title=form.cleaned_data.get('title'),
             #     start_date=form.cleaned_data.get('start_date'),
@@ -66,11 +81,11 @@ def create(request):
             #     )
     else:
         form = PollModelForm()
+        formset = QuestionFormSet()
 
 
-    context = {
-        'form': form,
-    }
+    context['form'] = form
+    context['formset'] = formset
 
     return render(request, 'polls/create.html', context=context)
 

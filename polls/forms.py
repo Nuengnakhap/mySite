@@ -2,7 +2,7 @@ from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
 
-from polls.models import Poll
+from polls.models import Poll, Question
 
 
 def validate_even(value):
@@ -38,12 +38,11 @@ class PollForm(forms.Form):
             # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
             self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
 
+class QuestionForm(forms.Form):
+    text = forms.CharField(widget=forms.Textarea)
+    type = forms.ChoiceField(choices=Question.TYPES, initial='01')
 
 class PollModelForm(forms.ModelForm):
-    email = forms.CharField(validators=[validators.validate_email])
-    no_questions = forms.IntegerField(label="จำนวนคำถาม", min_value=0, max_value=10,
-                                      required=True, validators=[validate_even])
-
     class Meta:
         model = Poll
         exclude = ['del_flag']
