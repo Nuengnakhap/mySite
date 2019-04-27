@@ -1,7 +1,9 @@
+from datetime import datetime
 from django import forms
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
+from django.utils.timezone import now
 
 from polls.models import Poll, Question, Comment, Choice
 
@@ -39,18 +41,34 @@ class PollForm(forms.Form):
     #         # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
     #         self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
 
-class QuestionForm(forms.Form):
+
+class QuestionForm(forms.ModelForm):
     question_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
-    text = forms.CharField(widget=forms.Textarea)
-    type = forms.ChoiceField(choices=Question.TYPES, initial='01')
+
+    class Meta:
+        model = Question
+        exclude = ['poll']
+
+        widgets = {
+            'text': forms.TextInput(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-control'}),
+        }
+
 
 class QuestionModelForm(forms.Form):
     question = forms.CharField(widget=forms.Textarea)
+
 
 class PollModelForm(forms.ModelForm):
     class Meta:
         model = Poll
         exclude = ['del_flag']
+
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
 
     # def clean_title(self):
     #     data = self.cleaned_data['title']
@@ -72,10 +90,12 @@ class PollModelForm(forms.ModelForm):
     #         # raise forms.ValidationError("โปรดเลือกวันเริ่มต้น")
     #         self.add_error('start_date', "โปรดเลือกวันเริ่มต้น")
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['title', 'body', 'email' ,'tel']
+        fields = ['title', 'body', 'email', 'tel']
+
     # title = forms.CharField(max_length=100, required=True)
     # body = forms.CharField(max_length=500, required=True)
     # email = forms.EmailField(validators=[validators.validate_email])
@@ -107,6 +127,7 @@ class CommentForm(forms.ModelForm):
         # elif not validators.validate_email(email):
         #     self.add_error('email', "Email a valid email address")
 
+
 # class ContactForm(forms.Form):
 #     subject = forms.CharField(max_length=100)
 #     message = forms.CharField()
@@ -117,6 +138,7 @@ class ChoiceForm(forms.ModelForm):
     class Meta:
         model = Choice
         exclude = []
+
 
 class CreateQuestion(forms.Form):
     text = forms.CharField(widget=forms.Textarea)

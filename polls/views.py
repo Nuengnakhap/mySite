@@ -12,7 +12,6 @@ from polls.models import Poll, Question, Answer, Choice
 
 # Create your views here.
 def index(request):
-
     poll_list = Poll.objects.all()
 
     for poll in poll_list:
@@ -25,29 +24,29 @@ def index(request):
     }
     return render(request, template_name='polls/index.html', context=context)
 
+
 @login_required
 @permission_required('polls.view_poll')
 def detail(request, poll_id):
     poll = Poll.objects.get(pk=poll_id)
     for question in poll.question_set.all():
-        name = 'choice'+str(question.id)
+        name = 'choice' + str(question.id)
         choice_id = request.GET.get(name)
         if choice_id:
             try:
                 ans = Answer.objects.get(question_id=question.id)
-                ans.choice_id=choice_id
+                ans.choice_id = choice_id
             except Answer.DoesNotExist:
                 Answer.objects.create(
                     choice_id=choice_id,
                     question_id=question.id
                 )
 
-    return render(request, 'polls/detail.html', { 'poll':poll })
+    return render(request, 'polls/detail.html', {'poll': poll})
 
 
 @login_required
 @permission_required('polls.add_poll')
-
 # CreateQuestion
 def create_q(request, poll_id):
     context = {}
@@ -61,11 +60,10 @@ def create_q(request, poll_id):
             poll = form.save()
             if formset.is_valid():
                 for question_form in formset:
-
                     Question.objects.create(
                         text=question_form.cleaned_data.get('question'),
                         type=question_form.cleaned_data.get('type'),
-                        poll_id = poll.id
+                        poll_id=poll.id
                     )
                     Choice.objects.create(
                         text=question_form.cleaned_data.get('text'),
@@ -90,12 +88,10 @@ def create_q(request, poll_id):
         form = QuestionModelForm()
         formset = CreateQuestionFormSet()
 
-
     context['form'] = form
     context['formset'] = formset
 
     return render(request, 'polls/create_question.html', context=context)
-
 
 
 def create(request):
@@ -110,11 +106,10 @@ def create(request):
             poll = form.save()
             if formset.is_valid():
                 for question_form in formset:
-
                     Question.objects.create(
-                        text=question_form.cleaned_data.get('text' ),
+                        text=question_form.cleaned_data.get('text'),
                         type=question_form.cleaned_data.get('type'),
-                        poll_id = poll.id
+                        poll_id=poll.id
                     )
                     # ques += 1
                 context['success'] = "Poll %s is created successfully!" % poll.title
@@ -135,27 +130,28 @@ def create(request):
         form = PollModelForm()
         formset = QuestionFormSet()
 
-
     context['form'] = form
     context['formset'] = formset
 
     return render(request, 'polls/create.html', context=context)
 
+
 @login_required
 def update(request, poll_id):
     poll = Poll.objects.get(id=poll_id)
-    QuestionFormSet = formset_factory(QuestionForm, extra=0)
-    context = {}
+    QuestionFormSet = formset_factory(QuestionForm, extra=2)
+    context = {'poll': poll}
+
     if request.method == 'POST':
         form = PollModelForm(request.POST)
-
         formset = QuestionFormSet(request.POST)
+
         if form.is_valid():
-            form.save()
+            # form.save()
             if formset.is_valid():
                 for question_form in formset:
                     if question_form.cleaned_data.get('question_id'):
-                        question = Question.objects.get(id = question_form.cleaned_data.get('question_id'))
+                        question = Question.objects.get(id=question_form.cleaned_data.get('question_id'))
 
                         if question:
                             question.text = question_form.cleaned_data.get('text')
@@ -168,8 +164,9 @@ def update(request, poll_id):
                                 type=question_form.cleaned_data.get('type'),
                                 poll_id=poll.id
                             )
-                        print(question.id,'dd')
-            context['success'] = "Poll %s is created successfully!" % poll.title
+            context['success'] = "Saved successful"
+            formset = QuestionFormSet(initial=[{'text': i.text, 'type': i.type, 'question_id': i.id}
+                                               for i in poll.question_set.all()])
 
     else:
         form = PollModelForm(instance=poll)
@@ -177,18 +174,35 @@ def update(request, poll_id):
         for question in poll.question_set.all():
             data.append(
                 {
-                    'text':question.text,
-                    'type' : question.type,
-                    'question_id':question.id
+                    'text': question.text,
+                    'type': question.type,
+                    'question_id': question.id
                 }
             )
         formset = QuestionFormSet(initial=data)
 
-    context['poll'] = poll
     context['form'] = form
     context['formset'] = formset
 
     return render(request, 'polls/update.html', context=context)
+
+
+@login_required
+def delete_poll(request, poll_id):
+    poll = Poll.objects.get(id=poll_id)
+    context = {'poll': poll}
+    if request.method == 'POST':
+        # choices.delete()
+        for q in poll.question_set.all():
+            for c in q.choice_set.all():
+                c.delete()
+            q.delete()
+
+        poll.delete()
+        return redirect('index')
+    else:
+        return render(request, 'polls/delete_poll.html', context=context)
+
 
 @login_required
 @permission_required('polls.add_comment')
@@ -199,7 +213,6 @@ def comment(request, poll_id):
         form.save()
     else:
         form = CommentForm()
-
 
     context = {
         'form': form,
@@ -217,9 +230,6 @@ def questions(request, poll_id, question_id):
     choices = [{'id': i.id, 'text': i.text, 'value': i.value, 'question': i.question_id}
                for i in question.choice_set.all()]
 
-
-
-
     context = {
         'poll': question.poll,
         'question': question,
@@ -227,9 +237,6 @@ def questions(request, poll_id, question_id):
     }
 
     return render(request, 'polls/create_question.html', context=context)
-
-
-
 
 
 def mylogin(request):
@@ -261,6 +268,7 @@ def mylogin(request):
         context['next_url'] = next_url
 
     return render(request, 'polls/login.html', context=context)
+
 
 def mylogout(request):
     logout(request)
