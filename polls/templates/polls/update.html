@@ -38,12 +38,12 @@
 
             {% if i.question_id.value > 0 %}
                 <div class="m-top">
-{#                    <a href="{% url 'edit-choice' question_id=i.question_id.value %}">#}
-{#                        <input type="button" class="btn btn-warning" value="Edit Choices">#}
-{#                    </a>#}
-{#                    <a href="{% url 'delete-question' question_id=i.question_id.value %}">#}
-{#                        <input type="button" class="btn btn-danger" value="Delete Question">#}
-{#                    </a>#}
+                    <a href="{% url 'edit_choice' poll_id=poll.id question_id=i.question_id.value %}">
+                        <input type="button" class="btn btn-warning" value="Edit Choices">
+                    </a>
+                    <a href="{% url 'delete_question' poll_id=poll.id question_id=i.question_id.value %}">
+                        <input type="button" class="btn btn-danger" value="Delete Question">
+                    </a>
                 </div>
             {% endif %}
         </div>

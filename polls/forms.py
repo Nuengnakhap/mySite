@@ -134,10 +134,10 @@ class CommentForm(forms.ModelForm):
 #     sender = forms.EmailField()
 #     recipients =
 
-class ChoiceForm(forms.ModelForm):
+class ChoiceModelForm(forms.ModelForm):
     class Meta:
         model = Choice
-        exclude = []
+        fields = '__all__'
 
 
 class CreateQuestion(forms.Form):

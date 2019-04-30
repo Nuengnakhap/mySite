@@ -14,12 +14,16 @@
         <div class="card-header">
             <b style="font-size: 24px;">Poll List</b>
             {% if user.is_authenticated %}
-            <div class="float-right">
-                {% if perms.polls.add_poll %}
-                    <a href="{% url 'create_poll' %}" class="btn btn-success">CREATE NEW POLL</a>
-                {% endif %}
-                <a href="{% url 'logout' %}" class="btn btn-danger">LOGOUT</a>
-            </div>
+                <div class="float-right">
+                    {% if perms.polls.add_poll %}
+                        <a href="{% url 'create_poll' %}" class="btn btn-success">CREATE NEW POLL</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="btn btn-danger">LOGOUT</a>
+                </div>
+            {% else %}
+                <div class="float-right">
+                    <a href="{% url 'login' %}" class="btn btn-success">LOGIN</a>
+                </div>
             {% endif %}
         </div>
         <div class="row card-body">
