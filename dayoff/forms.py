@@ -18,7 +18,7 @@ class DayOffForm(forms.ModelForm):
             'reason': forms.Textarea(attrs={'class': 'form-control'}),
             'type': forms.Select(attrs={'class': 'form-control'}),
             'date_start': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'date_end': forms.DateInput(attrs={'clas`s': 'form-control', 'type': 'date'}),
+            'date_end': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
 
     error = None
