@@ -9,9 +9,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Day Off Request</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
 </head>
 <body>
-<div>
+<div class="container">
     <h1 class="center title">แบบฟอร์มขอลางาน</h1>
 
     {% if error %}
@@ -27,26 +28,26 @@
     {% endif %}
 
     <form
-            class="container jumbotron narrow"
+            class="create jumbotron narrow"
             method="POST"
             action="{% url 'create-dayoff' %}"
     >
         {% csrf_token %}
 
         <div class="form-group">
-            เนื่องจาก
+            <p class="text-left">เนื่องจาก</p>
             {{ form.reason }}
         </div>
         <div class="form-group">
-            ประเภท
+            <p class="text-left">ประเภท</p>
             {{ form.type }}
         </div>
         <div class="form-group">
-            ตั้งแต่วันที่
+            <p class="text-left">ตั้งแต่วันที่</p>
             {{ form.date_start }}
         </div>
         <div class="form-group">
-            ถึงวันที่
+            <p class="text-left">ถึงวันที่</p>
             {{ form.date_end }}
         </div>
 

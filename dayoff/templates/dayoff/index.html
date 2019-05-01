@@ -7,16 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Day Off</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
 </head>
 <body>
-<div>
+<div class="container">
     <div class="center title">
         <h1>Day Off System</h1>
         <h2>รานการคำขอลางานของฉัน</h2>
     </div>
 
     {% if user.is_authenticated %}
-        <div class="container">
+        <div class="">
             <table class="table">
                 <tr>
                     <th>ประเภท</th>
@@ -57,12 +58,12 @@
             </table>
         </div>
     {% else %}
-        <div class="alert alert-primary center container narrow">
+        <div class="alert alert-primary center narrow">
             กรุณาเข้าสู่ระบบเพื่อดูรายการคำขอลางาน.
         </div>
     {% endif %}
 
-    <div class="container center">
+    <div class="center">
         <p class="text-muted">
             {% if user.is_authenticated %}
                 <br>Logged in as {{ user.get_username }}
